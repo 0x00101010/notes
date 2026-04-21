@@ -13,18 +13,18 @@ Why this matters, briefly:
 - Scaling impact: A 10× cadence reduction (with matching gas/sec discipline) absorbs a large fraction of the throughput, latency, and inclusion-predictability work.
 
 The goal here is not to re-argue the strategy. The goal is to make execution clear:
+
 - what we need to do next,
 - what the hard gates are,
 - what work can run in parallel,
 - how much work this likely is,
 - and what order we should do it in.
 
-## Current baseline
+## Working assumptions
 
 - We are aligned on pursuing native 200ms blocks.
-- We are **not** yet committed to direct mainnet 200ms versus a staged rollout.
+- We are **targeting direct mainnet 200ms**. A staged rollout (e.g. 1s → 500ms → 200ms) would be a UX regression versus Flashblocks today, so it is not the default outcome. Staging is only acceptable if a hard gate forces it.
 - We should treat **QMDB as an escalation path**, not the default critical path.
-- We should treat **2D nonces / concurrent lanes** as strategically important but **not blocking** for native 200ms.
 - The immediate goal of Q2 is **de-risking the true blockers**, not pretending the whole effort is done once the first prototypes land.
 - On the proof side, the near-term concern is **not** that proving itself suddenly becomes fully synchronous. The near-term concern is that, with **reth as the only client**, the **historical-proofs ExEx / proof-serving path** must stay close enough to tip and recover from lag under 200ms cadence.
 
@@ -40,7 +40,7 @@ At the end of this work, we should be able to answer seven questions with eviden
 6. **Can the proof/output-root/security posture remain credible for mainnet?**
 7. **Can we migrate external consumers off Flashblocks cleanly enough to ship?**
 
-If the answer to any of those is no, the correct output is **staged rollout** or **no shipment yet** — not wishful execution.
+If the answer to any of those is no, the correct output is **staged rollout (reluctantly)** or **no shipment yet** — not wishful execution. Direct mainnet 200ms remains the default; staging is the fallback when a gate forces it.
 
 ## Plan structure
 
@@ -51,17 +51,18 @@ The work should be managed in four phases:
    - measure the current system
    - resolve the highest-risk semantic and security questions early
 
-2. **Phase 1 — Prove 5 Hz viability beyond the sequencer box**
-   - state-root path
-   - sequencer pipeline
-   - Engine API / verifier throughput
+2. **Phase 1 — Prove 200ms block viability**
+   - state-root performance optimization
+   - sequencer pipeline optimization
+   - Single binary - Engine API / verifier throughput
    - follower distribution / proof-serving behavior
+   - p2p viability
+   - HA / rollout readiness
 
 3. **Phase 2 — Integrate and harden**
    - gas/basefee/deposit policy
    - combined devnet
    - adversarial testing
-   - HA / rollout readiness
    - external readiness
 
 4. **Phase 3 — Rollout decision**
@@ -83,7 +84,7 @@ Must include:
 - what follower/distribution topology we are willing to support for launch
 - failover / HA SLOs for the sequencer path
 - what proof posture is required for mainnet
-- whether direct mainnet 200ms is assumed or must be earned
+- what specifically would force a staged rollout instead of direct mainnet 200ms
 
 ### Gate 2 — Timestamp semantics
 We need a final position on same-second blocks and the compatibility blast radius.
@@ -246,10 +247,11 @@ Tracks:
 - public testnet validation
 - mainnet recommendation
 
-Allowed outcomes:
-- direct mainnet 200ms
-- staged rollout (for example 1s/500ms → 200ms)
-- do not ship yet
+Allowed outcomes, in order of preference:
+
+- **direct mainnet 200ms** (default — the only outcome that avoids a UX regression versus Flashblocks)
+- **staged rollout** (for example 1s/500ms → 200ms) — only if a hard gate forces it
+- **do not ship yet**
 
 ## Dependency view
 
@@ -356,7 +358,7 @@ By the end of Q2, we should know:
 - whether the supported follower topology is credible for launch,
 - whether the reth proof-serving path can stay close enough to tip and recover from lag,
 - whether op-conductor needs tuning only or deeper architectural changes,
-- whether a direct mainnet jump is even on the table,
+- whether anything has emerged that would force us off direct mainnet 200ms,
 - and whether the project is still an execution effort or has become a deeper architectural rewrite.
 
 ## QMDB escalation rules
@@ -400,3 +402,15 @@ If we were starting this work this week, the next moves should be:
 - Proof / output-root posture turns the effort into testnet-only.
 - QMDB quietly becomes default because the non-QMDB path was not pushed hard enough.
 - Migration work gets discovered too late and turns a viable core path into a shipping delay.
+
+## Bottom line
+
+This is a **multi-track execution plan**, not a simple optimization project.
+
+The right posture is:
+
+- use Q2 to de-risk the true blockers,
+- keep the non-QMDB path as the default until evidence says otherwise,
+- force the system to prove 5 Hz end-to-end,
+- make distribution, proof-serving, and HA explicit instead of implicit,
+- and earn direct mainnet 200ms only if the gates actually clear.
