@@ -1,0 +1,57 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import SkillTree from '../components/SkillTree';
+import { marked } from 'marked';
+import planSource from '../content/plan.md?raw';
+
+const slugify = (s: string) =>
+  s.toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+
+const renderer = new marked.Renderer();
+renderer.heading = ({ text, depth }: { text: string; depth: number }) => {
+  const id = slugify(text.replace(/<[^>]+>/g, ''));
+  const inner = marked.parseInline(text) as string;
+  return `<h${depth} id="${id}">${inner}</h${depth}>\n`;
+};
+
+marked.setOptions({ renderer, gfm: true, breaks: false });
+
+const titleMatch = planSource.match(/^#\s+(.+)$/m);
+const title = titleMatch ? titleMatch[1].trim() : 'Plan';
+let body = planSource.replace(/^#\s+.+\n+/, '');
+
+const mermaidPattern = /(##\s+Dependency graph[^\n]*\n+)```mermaid[\s\S]*?```\n*/;
+const split = body.split(mermaidPattern);
+
+let beforeHtml = '';
+let depHeadingHtml = '';
+let afterHtml = '';
+
+if (split.length === 3) {
+  beforeHtml = await marked.parse(split[0]);
+  depHeadingHtml = await marked.parse(split[1]);
+  afterHtml = await marked.parse(split[2]);
+} else {
+  beforeHtml = await marked.parse(body);
+}
+---
+
+<DocLayout
+  title={title}
+  subtitle="From baseline measurement to mainnet recommendation — 15 steps, 9 dependency-bound."
+  maturity="draft"
+>
+  <Fragment set:html={beforeHtml} />
+  {split.length === 3 && (
+    <>
+      <Fragment set:html={depHeadingHtml} />
+      <div class="skill-tree-section">
+        <SkillTree client:load />
+      </div>
+      <Fragment set:html={afterHtml} />
+    </>
+  )}
+</DocLayout>

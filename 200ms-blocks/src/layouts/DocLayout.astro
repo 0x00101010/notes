@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  maturity?: 'ready' | 'draft';
+}
+
+const { title, subtitle, maturity = 'draft' } = Astro.props;
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <script is:inline>
+    (function () {
+      var stored = localStorage.getItem('theme');
+      var theme = stored || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+  <ThemeToggle client:load />
+  <div class="page">
+    <a href="/"
+       style="display:inline-block;margin-bottom:1rem;font-size:0.82rem;color:var(--muted);text-decoration:none;font-family:system-ui,sans-serif;transition:color 0.15s;"
+       onmouseover="this.style.color='var(--accent)'"
+       onmouseout="this.style.color='var(--muted)'">&larr; Home</a>
+    <h1>{title}</h1>
+    {subtitle && <p class="subtitle">{subtitle}</p>}
+    {maturity === 'draft' && (
+      <div class="maturity-banner maturity-draft">
+        <span class="maturity-dot" style="background:var(--yellow);"></span>
+        Draft &mdash; under active development
+      </div>
+    )}
+    <slot />
+  </div>
+</body>
+</html>
