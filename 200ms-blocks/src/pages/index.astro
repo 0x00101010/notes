@@ -24,7 +24,7 @@ import ThemeToggle from '../components/ThemeToggle';
       Engineering plans for moving Base from 2-second blocks (with Flashblocks preconfirmations) to native 200ms.
     </p>
     <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:460px;">
-      <a href="/plan" style="display:block;padding:18px 24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;text-decoration:none;transition:border-color 0.15s;position:relative;">
+      <a href={`${import.meta.env.BASE_URL}plan`} style="display:block;padding:18px 24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;text-decoration:none;transition:border-color 0.15s;position:relative;">
         <span style="position:absolute;top:10px;right:12px;font-size:0.55rem;padding:2px 6px;border-radius:4px;font-family:system-ui,sans-serif;font-weight:600;color:var(--yellow);background:color-mix(in srgb, var(--yellow) 12%, transparent);white-space:nowrap;">Draft</span>
         <div style="font-size:1.1rem;font-weight:600;color:var(--heading);font-family:system-ui,sans-serif;">First-Principles 200ms Plan</div>
         <div style="font-size:0.82rem;color:var(--muted);margin-top:4px;font-family:system-ui,sans-serif;">15 steps from baseline measurement to mainnet recommendation, with an interactive dependency tree.</div>

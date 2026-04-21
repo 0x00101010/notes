@@ -1,0 +1,110 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '200ms-blocks/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: 200ms-blocks/package-lock.json
+
+      - name: Install
+        working-directory: 200ms-blocks
+        run: npm ci
+
+      - name: Build
+        working-directory: 200ms-blocks
+        run: npm run build
+
+      - name: Stage multi-site artifact
+        run: |
+          set -euo pipefail
+          mkdir -p _site/200ms-blocks
+          cp -r 200ms-blocks/dist/. _site/200ms-blocks/
+
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>notes</title>
+            <style>
+              :root { color-scheme: dark; }
+              body {
+                background: #0a0c14;
+                color: #d4d8ea;
+                font-family: system-ui, -apple-system, sans-serif;
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 20px;
+              }
+              h1 { font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; color: #fff; }
+              p  { color: #6b7099; margin: 0 0 32px; font-size: 0.95rem; }
+              .grid { display: grid; gap: 12px; width: 100%; max-width: 460px; }
+              a {
+                display: block;
+                padding: 18px 22px;
+                background: #11141d;
+                border: 1px solid #2a2f44;
+                border-radius: 10px;
+                color: inherit;
+                text-decoration: none;
+                transition: border-color 0.15s, background 0.15s;
+              }
+              a:hover { border-color: #6c8fff; background: #161b29; }
+              a strong { display: block; color: #fff; font-size: 1.05rem; font-weight: 600; }
+              a span   { display: block; color: #6b7099; font-size: 0.82rem; margin-top: 4px; }
+            </style>
+          </head>
+          <body>
+            <h1>notes</h1>
+            <p>Static sites built from this repo.</p>
+            <div class="grid">
+              <a href="./200ms-blocks/">
+                <strong>200ms Blocks</strong>
+                <span>First-principles plan + interactive 15-step skill tree</span>
+              </a>
+            </div>
+          </body>
+          </html>
+          HTML
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
