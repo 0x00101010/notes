@@ -30,44 +30,18 @@ The goal here is not to re-argue the strategy. The goal is to make execution cle
 
 ## What success looks like
 
-At the end of this work, we should be able to answer seven questions with evidence, not intuition:
+Success means we can ship **direct mainnet 200ms** with evidence, not intuition, that the system holds up end-to-end at 5 Hz — across the sequencer, the verifier path, follower distribution, proof serving, and the existing ecosystem.
 
-1. **Can we define semantically safe 200ms blocks?**
-2. **Can the sequencer/state-root path actually fit inside the cadence budget?**
-3. **Can op-node, EL, and verifiers keep up at 5 Hz without unhealthy lag?**
-4. **Can the supported follower/distribution topology keep up at 5 Hz without permanently lagging the unsafe head?**
-5. **Can the reth historical-proofs ExEx stay within bounded lag and catch up after downtime/backlog at 200ms blocks?**
-6. **Can the proof/output-root/security posture remain credible for mainnet?**
-7. **Can we migrate external consumers off Flashblocks cleanly enough to ship?**
-
-If the answer to any of those is no, the correct output is **staged rollout (reluctantly)** or **no shipment yet** — not wishful execution. Direct mainnet 200ms remains the default; staging is the fallback when a gate forces it.
+The detailed bar for each of those is enumerated in **Hard gates** below. Anything that fails its gate forces either a staged rollout (reluctantly) or no shipment yet — not wishful execution.
 
 ## Plan structure
 
-The work should be managed in four phases:
+The work is managed in four phases. Each phase has one guiding question; the detailed tracks for each phase live in **Work ordering** below.
 
-1. **Phase 0 — Lock the rules**
-   - define success criteria
-   - measure the current system
-   - resolve the highest-risk semantic and security questions early
-
-2. **Phase 1 — Prove 200ms block viability**
-   - state-root performance optimization
-   - sequencer pipeline optimization
-   - Single binary - Engine API / verifier throughput
-   - follower distribution / proof-serving behavior
-   - p2p viability
-   - HA / rollout readiness
-
-3. **Phase 2 — Integrate and harden**
-   - gas/basefee/deposit policy
-   - combined devnet
-   - adversarial testing
-   - external readiness
-
-4. **Phase 3 — Rollout decision**
-   - public testnet
-   - mainnet recommendation
+1. **Phase 0 — Lock the rules.** What are we trying to prove, and what would disqualify the path early?
+2. **Phase 1 — Prove 5 Hz viability beyond the sequencer box.** Can the system actually sustain 200ms cadence across the surrounding paths that matter for launch — not just on the sequencer box?
+3. **Phase 2 — Integrate and harden.** Does the chosen path hold together as a real system?
+4. **Phase 3 — Rollout decision.** Should we ship, and how?
 
 ## Hard gates
 
