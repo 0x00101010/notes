@@ -2,10 +2,17 @@
 
 ## Purpose
 
-This document assumes we are already aligned on the objective: **ship native canonical 200ms blocks if the system can support them safely and credibly**.
+> Bottom line: Native 200ms blocks are the biggest single lever for delivering Base’s realtime execution roadmap this year. They replace a large part of the current Flashblocks-specific interaction model with native protocol behavior, materially improve trustworthy realtime trading UX, and cover a meaningful chunk of the scaling work that matters most right now — without forcing QMDB or parallel-lane work onto the MVP critical path.
+
+This document assumes we are already aligned on the objective: ship native canonical 200ms blocks if the system can support them safely and credibly.
+
+Why this matters, briefly:
+
+- Trading and realtime UX: Base wins by becoming the best place to build real-time, programmable, always-on market apps, and that the priority is reliable realtime execution, not generic speed claims.
+- Simplification: Trading feedback is explicit that Flashblocks is a custom Base-only burden. Native 200ms blocks are the cleanest path toward making fast execution feel more standard and less special-case.
+- Scaling impact: A 10× cadence reduction (with matching gas/sec discipline) absorbs a large fraction of the throughput, latency, and inclusion-predictability work.
 
 The goal here is not to re-argue the strategy. The goal is to make execution clear:
-
 - what we need to do next,
 - what the hard gates are,
 - what work can run in parallel,
@@ -393,15 +400,3 @@ If we were starting this work this week, the next moves should be:
 - Proof / output-root posture turns the effort into testnet-only.
 - QMDB quietly becomes default because the non-QMDB path was not pushed hard enough.
 - Migration work gets discovered too late and turns a viable core path into a shipping delay.
-
-## Bottom line
-
-This is a **multi-track execution plan**, not a simple optimization project.
-
-The right posture is:
-
-- use Q2 to de-risk the true blockers,
-- keep the non-QMDB path as the default until evidence says otherwise,
-- force the system to prove 5 Hz end-to-end,
-- make distribution, proof-serving, and HA explicit instead of implicit,
-- and earn direct mainnet 200ms only if the gates actually clear.
