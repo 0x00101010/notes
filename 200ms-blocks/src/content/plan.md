@@ -142,71 +142,11 @@ These are the concrete bodies of work required to clear the hard gates and make 
 | Public testnet validation | External consumers validate the path and all blockers are triaged | 3 | adversarial soak + recovery campaign, Flashblocks consumer migration plan |
 | Mainnet recommendation | Final recommendation is either direct mainnet 200ms or do not ship yet | 3 | public testnet validation |
 
-## Work ordering
-
-### Phase 0 — Lock the rules (start immediately)
-
-This phase answers: **what are we trying to prove, and what would disqualify the path early?**
-
-Priority order:
-1. shipping contract + success criteria
-2. baseline measurement harness
-3. timestamp semantics + compatibility matrix
-4. proof / output-root posture pre-gate
-
-Notes:
-- Steps 1 and 2 should begin immediately.
-- The shipping contract should set not just latency targets, but also the launch assumptions for follower topology, proof-serving lag, empty-block policy, and HA behavior.
-- Timestamp semantics should start as soon as the shipping contract is drafted; it does not need to wait for every measurement.
-- Proof / output-root posture should move early enough that we do not burn a quarter on performance work only to discover the mainnet security posture is unacceptable.
-
-### Phase 1 — Prove 200ms viability beyond the sequencer box
-
-This phase answers: **can the system actually sustain 200ms cadence, not just on the sequencer box, but across the surrounding paths that matter for launch?**
-
-Parallel tracks:
-- non-QMDB state-root MVP
-- sequencer pipeline prototype
-- Engine API fast path / batching
-- base-consensus / validator throughput proof
-- historical proof-serving benchmark + catch-up
-- P2P distribution + topology decision
-
-This is the real center of gravity of the work.
-
-If this phase fails, the response is:
-- escalation to QMDB,
-- or no shipment yet.
-
-Staged rollout (e.g. 1s → 500ms → 200ms) is **not** an outcome — it would be a UX regression versus Flashblocks.
-
-### Phase 2 — Integrate and harden
-
-This phase answers: **does the chosen path hold together as a real system?**
-
-Tracks:
-- gas / basefee / deposit policy
-- Flashblocks consumer migration plan
-- integrated 200ms devnet
-- HA performance + failover validation
-- adversarial soak + recovery campaign
-
-This is where we stop proving isolated components and start proving operability.
-
-### Phase 3 — Rollout decision
-
-This phase answers: **should we ship, and how?**
-
-Tracks:
-- public testnet validation
-- mainnet recommendation
-
-Allowed outcomes:
-
-- **direct mainnet 200ms** (the only acceptable ship outcome — anything slower is a UX regression versus Flashblocks)
-- **do not ship yet**
-
-Staged rollout is not on the table.
+> **Phase notes:**
+>
+> - **Phase 0:** shipping contract and baseline measurement start immediately; everything else depends on them. Move proof / output-root posture early enough to avoid burning a quarter on performance work before discovering the mainnet security posture is unacceptable.
+> - **Phase 1** is the center of gravity. If it fails, the response is escalation to QMDB or no shipment yet — **staged rollout is not an outcome**.
+> - **Phase 3** ships only direct mainnet 200ms or returns "do not ship yet."
 
 ## Dependency view
 
