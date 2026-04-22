@@ -47,93 +47,76 @@ The work is managed in four phases. Each phase has one guiding question; the det
 
 These are the gates that can redirect or kill the effort.
 
-### Gate 1 — Plan contract
-We need a single written definition of what “native 200ms” means for this effort.
+### Gate 1 — Shipping contract
+
+A single written definition of what "native 200ms" means for this effort.
 
 Must include:
-- target cadence and candidate p95/p99 SLO bounds
+
+- target cadence and candidate p50/p95/p99 block building SLO bounds
 - unsafe lag / replay / recovery SLO bounds
-- what counts as acceptable verifier lag
-- what counts as acceptable **proof-serving lag**
-- what follower/distribution topology we are willing to support for launch
+- acceptable verifier lag
+- acceptable **proof-serving lag**
+- **empty-block policy** — acceptable empty-block rate at idle and during failover, and what counts as pathological empty-block behavior
+- supported follower/distribution topology for launch
 - failover / HA SLOs for the sequencer path
-- what proof posture is required for mainnet
-- what specifically would force a staged rollout instead of direct mainnet 200ms
+- required mainnet proof posture
 
 ### Gate 2 — Timestamp semantics
-We need a final position on same-second blocks and the compatibility blast radius.
 
-This is the highest semantic risk because it touches deployed contracts, tooling, and downstream assumptions.
+A final position on same-second blocks and the compatibility blast radius. Highest semantic risk because it touches deployed contracts, tooling, and downstream assumptions.
 
-### Gate 3 — Non-QMDB core 5 Hz viability
-We need to prove or kill the non-QMDB path first.
+### Gate 3 — Non-QMDB core viability at 200ms
 
-That means proving that a pipelined/deferred/optimized MPT path can hit the agreed SLO bounds under realistic profiles before we let QMDB become the default answer.
+Prove or kill the non-QMDB path first. A pipelined / deferred / optimized MPT path must hit the agreed SLO bounds under realistic profiles before QMDB becomes the default answer.
 
-### Gate 4 — Historical-proofs ExEx viability
-We need an explicit answer to whether the **reth historical-proofs ExEx / proof-serving path** can live with 200ms blocks.
+### Gate 4 — Block building performance
 
-This is a distinct gate because:
-- proving may be largely asynchronous,
+The sequencer must consistently build a block in under 200ms under realistic mempool and load conditions — not just on a clean lab box with synthetic transactions.
+
+Distinct from Gate 3: even with a fast state-root path, the rest of the build path has to fit inside the cadence budget.
+
+Must cover:
+
+- transaction execution time per block under target gas
+- mempool interaction cost (selection, eviction, reordering) at 200ms cadence
+- block assembly + sealing time
+- gossip initiation time from the sequencer
+- behavior under realistic load profiles: trading-burst, deposit-heavy, idle, recovery-replay
+
+If the sequencer hot path cannot consistently fit inside 200ms under these profiles, the rest of the stack is irrelevant.
+
+### Gate 5 — Historical-proofs ExEx viability
+
+Can the **reth historical-proofs ExEx / proof-serving path** live with 200ms blocks?
+
+Distinct gate because:
+
+- **multiprover proof generation** runs largely off the hot path,
 - but proof serving is still a shipping requirement,
-- and with **reth as the only client**, there is no alternate client escape hatch if this path falls behind.
+- and with **reth as the only client**, there is no alternate-client escape hatch if this path falls behind.
 
-This gate must cover:
-- same-gas-per-second benchmarking at 200ms blocks,
-- block-processing write overhead,
-- prune behavior,
-- verification-interval overhead,
-- latest-vs-tip lag,
-- and catch-up time after induced backlog or downtime.
+Must cover same-gas-per-second benchmarking at 200ms and catch-up time after induced backlog or downtime.
 
-### Gate 5 — Distribution / P2P viability
-We need a supported distribution story for 200ms blocks.
+### Gate 6 — Distribution / P2P viability
 
-This is not just “can we initiate gossip quickly from the sequencer.” It is “can the supported follower topology receive and advance the unsafe head within the agreed SLO bounds at 5 Hz?”
+A supported distribution story for 200ms blocks. Not "can we initiate gossip quickly from the sequencer" — but "can the supported follower topology receive and advance the unsafe head within the agreed SLO bounds at 200ms?"
 
-If plain P2P gossip is not sufficient, we need to explicitly decide whether launch depends on direct peering, streaming, or some other supported topology.
+If plain P2P gossip is not sufficient, decide explicitly whether launch depends on direct peering, streaming, or some other supported topology.
 
-### Gate 6 — HA / op-conductor rollout readiness
-We need explicit proof that the sequencer HA solution can support 200ms blocks without turning failover into empty-block theater.
+### Gate 7 — HA / op-conductor rollout readiness
 
-This is a **rollout gate**, not the first lab-viability gate. It must cover:
-- leader transfer time,
-- empty-block behavior during failover,
-- raft publish / replication latency,
-- payload-size sensitivity,
-- and stability under sustained 200ms load.
+Explicit proof that the sequencer HA solution can support 200ms blocks without turning failover into empty-block theater.
 
-### Gate 7 — Proof / security posture
-We need an explicit mainnet posture from the proof/output-root side.
+A **rollout gate**, not a lab-viability gate. Must cover leader transfer time, empty-block behavior during failover, raft publish / replication latency, payload-size sensitivity, and stability under sustained 200ms load.
 
-The right framing here is:
-- raw proving may remain mostly asynchronous,
-- but the output-root / dispute / proof-serving model still needs a formal signoff,
+### Gate 8 — Proof / security posture
+
+Explicit mainnet posture from the proof/output-root side:
+
+- **multiprover proof generation** runs largely off the hot path,
+- but the output-root / dispute / proof-serving model still needs formal signoff,
 - and any dependence on the reth proof-serving path must be made explicit in the final posture.
-
-## Specific concerns that must be hammered out explicitly
-
-### P2P / distribution
-- `native-200ms-blocks.md` already gives only **10ms** for gossip initiation in the 200ms budget.
-- The existing risk register already states that if **P2P gossip latency > 200ms**, followers are always behind.
-- The plan therefore needs to measure **end-to-end follower lag**, not just sequencer-side initiation time.
-- The output must be a concrete shipping posture: plain gossip, direct peering, streaming, or a hybrid.
-
-### Historical-proofs ExEx / reth-only proof serving
-- The current proofs-history path is asynchronous, which is good, but that does **not** mean it is free.
-- The hot path still writes versioned trie/state data for each committed block and has prune / verification / catch-up behavior that must be benchmarked under 200ms cadence.
-- The current configuration defaults were designed around **2s blocks**; they should not be assumed to be correct at 200ms.
-- Because reth is the only client, this is not just a “nice to have for infra” concern — it is part of the shipping story.
-
-### op-conductor / sequencer HA
-- The main concerns are not abstract “HA is hard” concerns. They are concrete performance costs:
-  - JSON-RPC serialization / deserialization into conductor,
-  - raft publish size and replication latency,
-  - current raft-backend commit / fsync behavior,
-  - multi-AZ round-trip latency,
-  - leader flapping,
-  - and empty-block bursts during failover.
-- Local benchmark data already suggests the path is sensitive to payload size, and compression helps, but that only narrows the problem. It does not eliminate the need for an explicit rollout gate.
 
 ## Workstreams
 
@@ -143,14 +126,14 @@ The table below is the real execution backbone.
 
 | Workstream | Phase | Suggested owner | Rough effort | Depends on | Exit criterion |
 |---|---|---|---:|---|---|
-| Plan contract + success criteria | 0 | Architecture / leadership | 0.5–1.0 weeks | none | ADR defines cadence target, recovery SLO bounds, proof-serving lag SLO bounds, supported topology assumptions, HA SLOs, and allowed rollout outcomes |
+| Shipping contract + success criteria | 0 | Architecture / leadership | 0.5–1.0 weeks | none | ADR defines cadence target, recovery SLO bounds, proof-serving lag SLO bounds, empty-block policy, supported topology assumptions, HA SLOs, and required mainnet proof posture |
 | Baseline measurement harness | 0 | EL / sequencer | 1–2 weeks | none | timing artifact for empty, normal, trading-burst, deposit-heavy, recovery-replay, and same-gas/sec-at-200ms profiles |
-| Timestamp semantics + compatibility matrix | 0 | Protocol / architecture | 2–3 weeks | plan contract | approved ADR and compatibility matrix for TWAP/oracles, vesting, governance, bridges, explorers, RPC, and searchers |
-| Proof / output-root posture pre-gate | 0 | Proof / security | 1–2 weeks | plan contract | explicit initial verdict on output-root/dispute posture and what remains asynchronous vs shipping-critical |
+| Timestamp semantics + compatibility matrix | 0 | Protocol / architecture | 2–3 weeks | shipping contract | approved ADR and compatibility matrix for TWAP/oracles, vesting, governance, bridges, explorers, RPC, and searchers |
+| Proof / output-root posture pre-gate | 0 | Proof / security | 1–2 weeks | shipping contract | explicit initial verdict on output-root/dispute posture and what remains off the hot path vs shipping-critical |
 | Non-QMDB state-root MVP | 1 | EL / state | 3–5 weeks | baseline measurement | explicit APPROVE / REJECT on pipelined or deferred non-QMDB path |
-| Sequencer pipeline prototype | 1 | EL / sequencer | 4–6 weeks | baseline measurement, state-root direction | prototype shows block build can overlap commit/state-root work without breaking recovery invariants |
+| Sequencer pipeline prototype | 1 | EL / sequencer | 4–6 weeks | baseline measurement, state-root direction | block build path consistently fits inside the 200ms budget under all named load profiles, with state-root work pipelined and recovery invariants intact |
 | Engine API fast path / batching prototype | 1 | EL + op-node | 2–4 weeks | baseline measurement | measured reduction in per-block fixed cost or per-block call tax |
-| Verifier / derivation throughput proof | 1 | op-node / protocol | 3–5 weeks | baseline measurement, Engine API prototype | bounded verifier lag and acceptable catch-up / recovery behavior at 5 Hz |
+| Verifier / derivation throughput proof | 1 | op-node / protocol | 3–5 weeks | baseline measurement, Engine API prototype | bounded verifier lag and acceptable catch-up / recovery behavior at 200ms |
 | Historical-proofs ExEx benchmark + catch-up | 1 | Reth / proofs | 2–4 weeks | baseline measurement | same-gas/sec 200ms benchmark completed; write/prune overhead measured; latest-vs-tip lag and backlog-drain time within the agreed SLO bounds |
 | Proof-history window / prune / verification tuning | 1 | Reth / proofs | 1–2 weeks | ExEx benchmark | 200ms window, prune interval, verification interval, and storage posture frozen for testnet |
 | P2P distribution validation + topology decision | 1 | Networking / op-node | 2–3 weeks | baseline measurement | supported topology chosen and end-to-end follower lag measured against the shipping SLO bounds |
@@ -160,7 +143,7 @@ The table below is the real execution backbone.
 | Integrated 200ms devnet | 2 | Cross-team | 2–3 weeks | timestamp, state-root, sequencer, Engine API, verifier, ExEx, and distribution tracks | combined environment running the chosen path end-to-end |
 | Adversarial soak + recovery campaign | 2 | Cross-team / SRE | 2–3 weeks | integrated devnet, op-conductor track | soak report covers burst, deposit-heavy, lag, restart, replay, distribution slowdown, and failover scenarios |
 | Public testnet validation | 3 | Cross-team / partner eng | 2–4 weeks | soak complete, migration plan ready, distribution gate green | external consumers validate the path and blocking issues are triaged |
-| Mainnet recommendation | 3 | Architecture / leadership | 0.5–1.0 weeks | public testnet, HA gate | explicit recommendation: direct 200ms, staged rollout, or no-ship-yet |
+| Mainnet recommendation | 3 | Architecture / leadership | 0.5–1.0 weeks | public testnet, HA gate | explicit recommendation: direct mainnet 200ms or do-not-ship-yet |
 
 ## Work ordering
 
@@ -169,18 +152,18 @@ The table below is the real execution backbone.
 This phase answers: **what are we trying to prove, and what would disqualify the path early?**
 
 Priority order:
-1. plan contract + success criteria
+1. shipping contract + success criteria
 2. baseline measurement harness
 3. timestamp semantics + compatibility matrix
 4. proof / output-root posture pre-gate
 
 Notes:
 - Steps 1 and 2 should begin immediately.
-- The plan contract should set not just latency targets, but also the launch assumptions for follower topology, proof-serving lag, and HA behavior.
-- Timestamp semantics should start as soon as the plan contract is drafted; it does not need to wait for every measurement.
+- The shipping contract should set not just latency targets, but also the launch assumptions for follower topology, proof-serving lag, empty-block policy, and HA behavior.
+- Timestamp semantics should start as soon as the shipping contract is drafted; it does not need to wait for every measurement.
 - Proof / output-root posture should move early enough that we do not burn a quarter on performance work only to discover the mainnet security posture is unacceptable.
 
-### Phase 1 — Prove 5 Hz viability beyond the sequencer box
+### Phase 1 — Prove 200ms viability beyond the sequencer box
 
 This phase answers: **can the system actually sustain 200ms cadence, not just on the sequencer box, but across the surrounding paths that matter for launch?**
 
@@ -194,10 +177,12 @@ Parallel tracks:
 
 This is the real center of gravity of the work.
 
-If this phase fails, everything after it should be reduced to:
-- staged rollout,
+If this phase fails, the response is:
 - target relaxation,
-- or escalation to QMDB.
+- escalation to QMDB,
+- or no shipment yet.
+
+Staged rollout (e.g. 1s → 500ms → 200ms) is **not** an outcome — it would be a UX regression versus Flashblocks.
 
 ### Phase 2 — Integrate and harden
 
@@ -221,17 +206,18 @@ Tracks:
 - public testnet validation
 - mainnet recommendation
 
-Allowed outcomes, in order of preference:
+Allowed outcomes:
 
-- **direct mainnet 200ms** (default — the only outcome that avoids a UX regression versus Flashblocks)
-- **staged rollout** (for example 1s/500ms → 200ms) — only if a hard gate forces it
+- **direct mainnet 200ms** (the only acceptable ship outcome — anything slower is a UX regression versus Flashblocks)
 - **do not ship yet**
+
+Staged rollout is not on the table.
 
 ## Dependency view
 
 ```mermaid
 flowchart TD
-    A[Plan contract + success criteria]
+    A[Shipping contract + success criteria]
     B[Baseline measurement harness]
     C[Timestamp semantics]
     D[Proof / output-root posture pre-gate]
@@ -286,7 +272,7 @@ flowchart TD
 
 The likely critical path is:
 
-1. Plan contract
+1. Shipping contract
 2. Baseline measurement
 3. Timestamp semantics
 4. Non-QMDB state-root direction
@@ -308,7 +294,7 @@ Q2 should be treated as the **de-risking quarter**, not the quarter where we ass
 
 ### Q2 must-complete items
 
-- Plan contract + success criteria
+- Shipping contract + success criteria
 - Baseline measurement harness
 - Timestamp semantics ADR + compatibility matrix
 - Proof / output-root posture pre-gate
@@ -354,7 +340,7 @@ If those triggers are not hit, QMDB stays a parallel long-term state-commitment 
 
 If we were starting this work this week, the next moves should be:
 
-1. Draft and review the plan contract / success criteria ADR, including supported topology, proof-serving lag, and failover SLOs.
+1. Draft and review the shipping contract / success criteria ADR, including supported topology, proof-serving lag, empty-block policy, and failover SLOs.
 2. Land the measurement harness for the 2s path and define the required load profiles, including same-gas/sec-at-200ms.
 3. Start the timestamp semantics ADR and compatibility matrix in parallel.
 4. Write the proof / output-root pre-gate questions and define what counts as a red flag.
@@ -385,6 +371,6 @@ The right posture is:
 
 - use Q2 to de-risk the true blockers,
 - keep the non-QMDB path as the default until evidence says otherwise,
-- force the system to prove 5 Hz end-to-end,
+- force the system to prove 200ms end-to-end,
 - make distribution, proof-serving, and HA explicit instead of implicit,
 - and earn direct mainnet 200ms only if the gates actually clear.
