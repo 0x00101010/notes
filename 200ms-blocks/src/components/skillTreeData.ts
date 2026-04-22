@@ -107,7 +107,7 @@ export const NODES: SkillNode[] = [
     what: 'Choose the supported follower topology and prove follower lag stays within shipping SLOs. If plain gossip is insufficient, the launch topology must be explicit.',
     output: 'Topology decision + follower-lag measurements.',
     deps: ['1', '2'],
-    col: 1, row: 6,
+    col: 1, row: 6, critical: true,
   },
   {
     id: '11', step: 11, title: 'Recalibrate Gas / Basefee / Deposits', category: 'protocol',
@@ -161,5 +161,5 @@ export const NODES: SkillNode[] = [
 ];
 
 export const CRITICAL_PATH: string[] = [
-  '1', '2', '3', '5', '6', '7', '8', '9', '13', '15', '16', '17',
+  '1', '2', '3', '5', '6', '7', '8', '9', '10', '13', '15', '16', '17',
 ];

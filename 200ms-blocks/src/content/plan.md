@@ -38,8 +38,7 @@ The detailed bar for each of those is defined in **Hard gates** below. Anything 
 This plan is organized around the decisions and work that determine whether direct mainnet 200ms is credible.
 
 - **Hard gates** define what must be true to ship.
-- **Workstreams** define the concrete bodies of work needed to clear those gates.
-- **Dependency view** shows what unblocks what.
+- **Dependency view** shows the workstreams as an interactive tree — what unblocks what.
 - **Critical path** shows what must go right in order.
 - **Q2 plan** and **Immediate next steps** translate that into near-term execution.
 
@@ -89,38 +88,6 @@ Prove the sequencer HA path — including op-conductor — can support 200ms wit
 ### Gate 8 — Proof / security posture
 
 Establish explicit mainnet posture for output roots, disputes, and proof generation. **Multiprover proof generation** can remain off the hot path, but the overall proof/security model still needs formal signoff, and any dependence on the reth proof-serving path must be explicit.
-
-## Workstreams
-
-These are the concrete bodies of work required to clear the hard gates and make direct mainnet 200ms credible.
-
-
-| Workstream                                    | Exit criteria                                                                                                                                                                         | Phase | Depends on                                                                |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------- |
-| Shipping contract + success criteria          | Written shipping contract defines block building SLOs, recovery / failover SLOs, proof-serving lag limits, empty-block policy, supported topology, and required mainnet proof posture | 0     | none                                                                      |
-| Baseline measurement harness                  | Benchmark results exist for empty, normal, trading-burst, deposit-heavy, recovery, and same-gas/sec-at-200ms profiles                                                                 | 0     | none                                                                      |
-| Timestamp semantics + compatibility matrix    | Written timestamp design and compatibility matrix are complete for existing contracts, bridges, explorers, RPC, and searchers                                                         | 0     | shipping contract                                                         |
-| Proof / output-root posture pre-gate          | Clear initial verdict exists on output-root / dispute posture for native 200ms                                                                                                        | 0     | shipping contract                                                         |
-| Non-QMDB state-root MVP                       | Determine if existing MPT state root path fits our perf requirement under 200ms block time                                                                                            | 1     | baseline measurement                                                      |
-| block building pipeline optimization          | Block building path consistently fits inside the 200ms budget under named load profiles, with recovery invariants intact                                                              | 1     | baseline measurement, Non-QMDB state-root direction                       |
-| Engine API fast path / batching               | Single Base Binary => Per-block fixed overhead is reduced enough to support 200ms cadence                                                                                             | 1     | baseline measurement                                                      |
-| Base-consensus / validator throughput proof   | Validator / consensus path stays within lag and catch-up SLOs at 200ms                                                                                                                | 1     | baseline measurement, Engine API prototype                                |
-| Historical proof-serving benchmark + catch-up | Historical proof serving stays within lag bounds, catches up after backlog, and proves the current path is viable for shipping                                                        | 1     | baseline measurement                                                      |
-| P2P distribution + topology decision          | Supported topology is chosen and follower lag stays within shipping SLOs                                                                                                              | 1     | baseline measurement                                                      |
-| Gas / basefee / deposit policy                | Initial 200ms policy is frozen with supporting simulation or benchmark evidence                                                                                                       | 2     | baseline measurement                                                      |
-| HA performance + failover validation          | Failover stays within SLOs and does not create unacceptable empty-block behavior                                                                                                      | 1     | block-building pipeline, validator throughput, P2P topology decision      |
-| Flashblocks consumer migration plan           | Consumer inventory, migration path, and deprecation/shim plan are complete                                                                                                            | 2     | none                                                                      |
-| Integrated 200ms devnet                       | Full chosen path runs end-to-end in one environment                                                                                                                                   | 2     | Phase 1 workstreams                                                       |
-| Adversarial soak + recovery campaign          | Soak results cover burst, deposit-heavy, lag, restart, replay, distribution slowdown, and failover scenarios                                                                          | 2     | integrated devnet, HA validation                                          |
-| Public testnet validation                     | External consumers validate the path and all blockers are triaged                                                                                                                     | 3     | adversarial soak + recovery campaign, Flashblocks consumer migration plan |
-| Mainnet recommendation                        | Final recommendation is either direct mainnet 200ms or do not ship yet                                                                                                                | 3     | public testnet validation                                                 |
-
-
-> **Phase notes:**
->
-> - **Phase 0:** shipping contract and baseline measurement start immediately; everything else depends on them. Move proof / output-root posture early enough to avoid burning a quarter on performance work before discovering the mainnet security posture is unacceptable.
-> - **Phase 1** is the center of gravity. If it fails, the response is escalation to QMDB or no shipment yet.
-> - **Phase 3** ships only direct mainnet 200ms or returns "do not ship yet."
 
 ## Dependency view
 
