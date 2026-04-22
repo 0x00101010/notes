@@ -41,11 +41,7 @@ if (split.length === 3) {
 }
 ---
 
-<DocLayout
-  title={title}
-  subtitle="From shipping contract to mainnet recommendation — 17 steps, 12 on the critical path."
-  maturity="draft"
->
+<DocLayout title={title}>
   <Fragment set:html={beforeHtml} />
   {split.length === 3 && (
     <>

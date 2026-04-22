@@ -1,4 +1,12 @@
-:root {
+/* ============================================================
+   Theme presets — switch by setting data-theme on <html>.
+   Default is whatever DocLayout.astro sets in its boot script.
+   Available: light | dark | github | solarized-light |
+              solarized-dark | nord | catppuccin | tokyo-night
+   ============================================================ */
+
+:root,
+[data-theme="light"] {
   --bg: #f7f8fb;
   --surface: #ffffff;
   --surface2: #edf0f5;
@@ -12,16 +20,6 @@
   --yellow: #b45309;
   --red: #dc2626;
   --orange: #c2410c;
-
-  --cat-foundation: #fbbf24;
-  --cat-execution: #6c8fff;
-  --cat-protocol: #a78bfa;
-  --cat-opnode: #34d399;
-  --cat-l1: #fb923c;
-  --cat-flashblocks: #f472b6;
-  --cat-rpc: #2dd4bf;
-  --cat-cross: #c084fc;
-  --cat-concurrent: #ef4444;
 }
 
 [data-theme="dark"] {
@@ -31,7 +29,7 @@
   --border: #2a2f44;
   --text: #d4d8ea;
   --heading: #ffffff;
-  --muted: #6b7099;
+  --muted: #8a92b2;
   --accent: #6c8fff;
   --accent2: #a78bfa;
   --green: #34d399;
@@ -39,6 +37,112 @@
   --red: #f87171;
   --orange: #fb923c;
 }
+
+/* GitHub Light — clean docs feel */
+[data-theme="github"] {
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --surface2: #eaeef2;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --heading: #0d1117;
+  --muted: #656d76;
+  --accent: #0969da;
+  --accent2: #8250df;
+  --green: #1a7f37;
+  --yellow: #9a6700;
+  --red: #cf222e;
+  --orange: #bc4c00;
+}
+
+/* Solarized Light — Ethan Schoonover */
+[data-theme="solarized-light"] {
+  --bg: #fdf6e3;
+  --surface: #eee8d5;
+  --surface2: #e3ddc8;
+  --border: #93a1a1;
+  --text: #586e75;
+  --heading: #073642;
+  --muted: #93a1a1;
+  --accent: #268bd2;
+  --accent2: #6c71c4;
+  --green: #859900;
+  --yellow: #b58900;
+  --red: #dc322f;
+  --orange: #cb4b16;
+}
+
+/* Solarized Dark */
+[data-theme="solarized-dark"] {
+  --bg: #002b36;
+  --surface: #073642;
+  --surface2: #0a4654;
+  --border: #0f5666;
+  --text: #93a1a1;
+  --heading: #fdf6e3;
+  --muted: #586e75;
+  --accent: #268bd2;
+  --accent2: #6c71c4;
+  --green: #859900;
+  --yellow: #b58900;
+  --red: #dc322f;
+  --orange: #cb4b16;
+}
+
+/* Nord — arctic blue-grey dark */
+[data-theme="nord"] {
+  --bg: #2e3440;
+  --surface: #3b4252;
+  --surface2: #434c5e;
+  --border: #4c566a;
+  --text: #d8dee9;
+  --heading: #eceff4;
+  --muted: #7b88a1;
+  --accent: #88c0d0;
+  --accent2: #b48ead;
+  --green: #a3be8c;
+  --yellow: #ebcb8b;
+  --red: #bf616a;
+  --orange: #d08770;
+}
+
+/* Catppuccin Mocha — warm pastel dark */
+[data-theme="catppuccin"] {
+  --bg: #1e1e2e;
+  --surface: #181825;
+  --surface2: #313244;
+  --border: #45475a;
+  --text: #cdd6f4;
+  --heading: #f5e0dc;
+  --muted: #9399b2;
+  --accent: #89b4fa;
+  --accent2: #cba6f7;
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+  --orange: #fab387;
+}
+
+/* Tokyo Night — popular dev-tool dark */
+[data-theme="tokyo-night"] {
+  --bg: #1a1b26;
+  --surface: #16161e;
+  --surface2: #1f2335;
+  --border: #29304f;
+  --text: #c0caf5;
+  --heading: #ffffff;
+  --muted: #565f89;
+  --accent: #7aa2f7;
+  --accent2: #bb9af7;
+  --green: #9ece6a;
+  --yellow: #e0af68;
+  --red: #f7768e;
+  --orange: #ff9e64;
+}
+
+/* ============================================================
+   Base styles — driven entirely by the variables above.
+   ============================================================ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 

@@ -1,35 +1,30 @@
 ---
 import '../styles/global.css';
-import ThemeToggle from '../components/ThemeToggle';
+
+// Active theme. Change to one of:
+//   light | dark | github | solarized-light | solarized-dark |
+//   nord | catppuccin | tokyo-night
+const ACTIVE_THEME = 'catppuccin';
 ---
 
-<html lang="en">
+<html lang="en" data-theme={ACTIVE_THEME}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Native 200ms Blocks</title>
-  <script is:inline>
-    (function () {
-      var stored = localStorage.getItem('theme');
-      var theme = stored || 'dark';
-      document.documentElement.setAttribute('data-theme', theme);
-    })();
-  </script>
 </head>
 <body>
-  <ThemeToggle client:load />
   <div class="page" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;">
     <h1 style="text-align:center;margin-bottom:0.5em;">Native 200ms Blocks</h1>
-    <p style="text-align:center;color:var(--muted);font-family:system-ui,sans-serif;margin-bottom:3rem;max-width:42ch;">
+    <p style="text-align:center;color:var(--muted);font-family:system-ui,sans-serif;max-width:42ch;margin-bottom:2rem;">
       Engineering plans for moving Base from 2-second blocks (with Flashblocks preconfirmations) to native 200ms.
     </p>
-    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:460px;">
-      <a href={`${import.meta.env.BASE_URL}plan`} style="display:block;padding:18px 24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;text-decoration:none;transition:border-color 0.15s;position:relative;">
-        <span style="position:absolute;top:10px;right:12px;font-size:0.55rem;padding:2px 6px;border-radius:4px;font-family:system-ui,sans-serif;font-weight:600;color:var(--yellow);background:color-mix(in srgb, var(--yellow) 12%, transparent);white-space:nowrap;">Draft</span>
-        <div style="font-size:1.1rem;font-weight:600;color:var(--heading);font-family:system-ui,sans-serif;">First-Principles 200ms Plan</div>
-        <div style="font-size:0.82rem;color:var(--muted);margin-top:4px;font-family:system-ui,sans-serif;">15 steps from baseline measurement to mainnet recommendation, with an interactive dependency tree.</div>
-      </a>
-    </div>
+    <a href={`${import.meta.env.BASE_URL}plan`}
+       style="font-family:system-ui,sans-serif;font-size:0.95rem;font-weight:500;color:var(--accent);padding:10px 20px;border:1px solid var(--accent);border-radius:8px;text-decoration:none;transition:background 0.15s;"
+       onmouseover="this.style.background='color-mix(in srgb, var(--accent) 12%, transparent)'"
+       onmouseout="this.style.background='transparent'">
+      Read the plan &rarr;
+    </a>
   </div>
 </body>
 </html>

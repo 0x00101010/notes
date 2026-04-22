@@ -1,4 +1,4 @@
-# 200ms Block Time — Baseline Execution Plan
+# 200ms Block Time
 
 ## Purpose
 
