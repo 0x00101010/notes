@@ -22,10 +22,10 @@ npm run preview  # serve dist/
 
 `src/components/SkillTree.tsx` + `src/components/skillTreeData.ts`.
 
-- 15 nodes, dependencies parsed from the plan's mermaid graph
+- 17 nodes, dependencies parsed from the plan's mermaid graph
 - Click an unlockable node to light it up; cascades into newly-reachable children
-- "Auto-trace critical path" plays the longest chain (Steps 2 → 4 → 5 → 6 → 7 → 12 → 13 → 14 → 15)
-- "Highlight critical path" toggles a static orange overlay on the longest chain
+- "Auto-trace critical path" plays the chain (Steps 1 → 2 → 3 → 5 → 6 → 7 → 8 → 9 → 13 → 15 → 16 → 17)
+- "Highlight critical path" toggles a static orange overlay on the critical chain
 - Hover any node for the detail panel on the right
 
 ## Updating the plan

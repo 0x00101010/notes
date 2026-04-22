@@ -192,10 +192,10 @@ export default function SkillTree() {
       <div className="skill-tree-header">
         <div className="skill-tree-title">
           <span className="st-eyebrow">Interactive Plan</span>
-          <h3 className="st-h3">15-Step Dependency Tree</h3>
+          <h3 className="st-h3">17-Step Dependency Tree</h3>
           <p className="st-sub">
             Click a node to unlock it — its children light up when their prerequisites are met.
-            The longest critical chain runs through Steps 2 → 4 → 5 → 6 → 7 → 12 → 13 → 14 → 15.
+            The critical chain runs Steps 1 → 2 → 3 → 5 → (6, 7, 8) → 9 → 13 → 15 → 16 → 17.
           </p>
         </div>
         <div className="st-controls">

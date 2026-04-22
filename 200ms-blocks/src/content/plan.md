@@ -108,7 +108,7 @@ These are the concrete bodies of work required to clear the hard gates and make 
 | Historical proof-serving benchmark + catch-up | Historical proof serving stays within lag bounds, catches up after backlog, and proves the current path is viable for shipping                                                        | 1     | baseline measurement                                                      |
 | P2P distribution + topology decision          | Supported topology is chosen and follower lag stays within shipping SLOs                                                                                                              | 1     | baseline measurement                                                      |
 | Gas / basefee / deposit policy                | Initial 200ms policy is frozen with supporting simulation or benchmark evidence                                                                                                       | 2     | baseline measurement                                                      |
-| HA performance + failover validation          | Failover stays within SLOs and does not create unacceptable empty-block behavior                                                                                                      | 2     | integrated devnet, P2P topology decision                                  |
+| HA performance + failover validation          | Failover stays within SLOs and does not create unacceptable empty-block behavior                                                                                                      | 1     | block-building pipeline, validator throughput, P2P topology decision      |
 | Flashblocks consumer migration plan           | Consumer inventory, migration path, and deprecation/shim plan are complete                                                                                                            | 2     | none                                                                      |
 | Integrated 200ms devnet                       | Full chosen path runs end-to-end in one environment                                                                                                                                   | 2     | Phase 1 workstreams                                                       |
 | Adversarial soak + recovery campaign          | Soak results cover burst, deposit-heavy, lag, restart, replay, distribution slowdown, and failover scenarios                                                                          | 2     | integrated devnet, HA validation                                          |
@@ -128,23 +128,34 @@ This shows the minimum unblock relationships between workstreams.
 
 ```mermaid
 flowchart TD
-    A[Shipping contract + success criteria]
-    B[Baseline measurement harness]
-    C[Timestamp semantics]
-    D[Proof / output-root posture pre-gate]
-    E[Non-QMDB state-root MVP]
-    F[Sequencer pipeline prototype]
-    G[Engine API fast path / batching]
-    H[Base-consensus / validator throughput proof]
-    I[Historical proof-serving benchmark + catch-up]
-    K[P2P distribution + topology]
-    L[Gas / basefee / deposit policy]
-    M[Flashblocks consumer migration plan]
-    N[Integrated 200ms devnet]
-    O[HA performance + failover validation]
-    P[Adversarial soak + recovery]
-    Q[Public testnet validation]
-    R[Mainnet recommendation]
+    subgraph P0 [Phase 0 — Foundations]
+        A[Shipping contract + success criteria]
+        B[Baseline measurement harness]
+        C[Timestamp semantics]
+        D[Proof / output-root posture pre-gate]
+    end
+
+    subgraph P1 [Phase 1 — Performance + feasibility proofs]
+        E[Non-QMDB state-root MVP]
+        F[Sequencer pipeline prototype]
+        G[Engine API fast path / batching]
+        H[Base-consensus / validator throughput proof]
+        I[Historical proof-serving benchmark + catch-up]
+        K[P2P distribution + topology]
+        L[Gas / basefee / deposit policy]
+        O[HA performance + failover validation]
+    end
+
+    subgraph P2 [Phase 2 — Integration + hardening]
+        M[Flashblocks consumer migration plan]
+        N[Integrated 200ms devnet]
+        P[Adversarial soak + recovery]
+    end
+
+    subgraph P3 [Phase 3 — Ship decision]
+        Q[Public testnet validation]
+        R[Mainnet recommendation]
+    end
 
     A --> C
     A --> D
@@ -169,12 +180,19 @@ flowchart TD
     K --> N
     L --> N
     K --> O
-    N --> O
+    F --> O
+    H --> O
+    O --> N
     N --> P
     M --> Q
     O --> Q
     P --> Q
     Q --> R
+
+    style P0 fill:#f0f9ff,stroke:#0369a1
+    style P1 fill:#fef3c7,stroke:#b45309
+    style P2 fill:#fce7f3,stroke:#be185d
+    style P3 fill:#dcfce7,stroke:#15803d
 ```
 
 
@@ -197,7 +215,7 @@ The critical path to direct mainnet 200ms is:
 Notes:
 
 - **Proof / output-root posture** remains a hard side-gate that must stay green as the effort advances.
-- **op-conductor HA** is now an explicit rollout gate: it may not dominate viability, but it can still block launch.
+- **op-conductor HA** is treated as a Phase 1 feasibility gate, not just a rollout gate: failover behavior at 200ms can veto the path before integrated devnet, so it runs against the Phase 1 perf prototypes (sequencer pipeline, validator throughput, P2P topology) instead of after integration.
 
 ## Q2 plan
 

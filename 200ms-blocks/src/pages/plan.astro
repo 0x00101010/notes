@@ -23,7 +23,7 @@ const titleMatch = planSource.match(/^#\s+(.+)$/m);
 const title = titleMatch ? titleMatch[1].trim() : 'Plan';
 let body = planSource.replace(/^#\s+.+\n+/, '');
 
-const mermaidPattern = /(##\s+Dependency graph[^\n]*\n+)```mermaid[\s\S]*?```\n*/;
+const mermaidPattern = /(##\s+Dependency (?:graph|view)[^\n]*\n+)```mermaid[\s\S]*?```\n*/;
 const split = body.split(mermaidPattern);
 
 let beforeHtml = '';
