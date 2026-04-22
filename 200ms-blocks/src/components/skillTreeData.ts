@@ -132,10 +132,10 @@ export const NODES: SkillNode[] = [
   },
   {
     id: '14', step: 14, title: 'Validate HA / Failover', category: 'ha',
-    what: 'Prove the sequencer HA path and op-conductor support 200ms without turning failover into empty-block theater. Covers leader transfer time, raft latency, payload-size sensitivity, and sustained stability under load. Treated as a feasibility gate — runs against the Phase 1 perf prototypes before integrated devnet so HA risk surfaces early.',
+    what: 'Prove the sequencer HA path and op-conductor support 200ms without turning failover into empty-block theater. Covers leader transfer time, raft latency, payload-size sensitivity, and sustained stability under load.',
     output: 'HA / failover SLO validation + risk characterization.',
-    deps: ['1', '6', '8', '10'],
-    col: 2, row: 7,
+    deps: ['1', '13'],
+    col: 1, row: 8,
   },
   {
     id: '15', step: 15, title: 'Adversarial Soak + Recovery', category: 'integration',

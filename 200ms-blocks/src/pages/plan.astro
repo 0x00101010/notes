@@ -23,7 +23,9 @@ const titleMatch = planSource.match(/^#\s+(.+)$/m);
 const title = titleMatch ? titleMatch[1].trim() : 'Plan';
 let body = planSource.replace(/^#\s+.+\n+/, '');
 
-const mermaidPattern = /(##\s+Dependency (?:graph|view)[^\n]*\n+)```mermaid[\s\S]*?```\n*/;
+// Match the "Dependency view/graph" heading plus any intro prose, then the mermaid block.
+// Captures the heading + intro so it can still render above the SkillTree.
+const mermaidPattern = /(##\s+Dependency (?:graph|view)[^\n]*\n+(?:(?!```|^##\s)[^\n]*\n)*)```mermaid[\s\S]*?```\n*/m;
 const split = body.split(mermaidPattern);
 
 let beforeHtml = '';
@@ -41,7 +43,7 @@ if (split.length === 3) {
 
 <DocLayout
   title={title}
-  subtitle="From baseline measurement to mainnet recommendation — 15 steps, 9 dependency-bound."
+  subtitle="From shipping contract to mainnet recommendation — 17 steps, 12 on the critical path."
   maturity="draft"
 >
   <Fragment set:html={beforeHtml} />
